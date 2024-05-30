@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Web Pages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2a2a2a;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            position: relative;
+        }
+        .blurred {
+            filter: blur(10px); /* Aplicăm efectul de blur */
+            pointer-events: none;
+        }
+        .auth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .auth-box {
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .auth-box label {
+            display: block;
+            margin-bottom: 10px;
+            color: #ff4c4c;
+            text-align: center;
+        }
+        .auth-box input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            width: calc(100% - 20px); /* Adjust the width */
+            background: #2a2a2a;
+            color: #fff;
+            text-align: center; /* Center the text */
+        }
+        .auth-box button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #ff4c4c;
+            color: #fff;
+            cursor: pointer;
+        }
+        .menu-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 30px;
+            display: block;
+            z-index: 1000;
+            color: #fff;
+        }
+        .menu {
+            display: none;
+            flex-direction: column;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            z-index: 999;
+        }
+        .menu a {
+            color: #ff4c4c;
+            text-decoration: none;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .menu a:hover {
+            background-color: #444;
+        }
+        .iframe-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 2000px; 
+            margin-top: 60px;
+        }
+        .iframe-wrapper {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+            max-width: 30%;
+            box-sizing: border-box;
+        }
+        .iframe-wrapper h2 {
+            margin: 10px 0;
+            color: #ff4c4c;
+            text-align: center;
+        }
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+            border-radius: 10px;
+        }
+        @media (max-width: 1200px) {
+            .iframe-wrapper {
+                width: 45%;
+                max-width: 45%;
+            }
+        }
+        @media (max-width: 768px) {
+            .iframe-wrapper {
+                width: 100%;
+                max-width: 100%;
+            }
+            iframe {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container" id="auth-container">
+        <div class="auth-box">
+            <label for="access-code">Introdu codul de acces:</label>
+            <input type="password" id="access-code">
+            <button onclick="checkAccessCode()">Accesează</button>
+        </div>
+    </div>
+
+    <div class="menu-toggle">&#9776;</div>
+    <div class="menu">
+        <a href="index.html">Index</a>
+        <a href="sfpd.html">SFPD</a>
+        <a href="InfernusP.html">Infernus P</a>
+    </div>
+    <!-- Afiseaza iframe-urile, dar le aplica efectul de blur -->
+    <div class="iframe-container blurred" id="iframe-container">
+        <div class="iframe-wrapper">
+            <h2>Profile 1</h2>
+            <iframe src="https://panel.b-hood.ro" title="Panel B-Hood"></iframe>
+        </div>
+        <div class="iframe-wrapper">
+            <h2>Profile 2</h2>
+            <iframe src="https://panel.b-hood.ro" title="Panel B-Hood"></iframe>
+        </div>
+        <div class="iframe-wrapper">
+            <h2>Profile 3</h2>
+            <iframe src="https://panel.b-hood.ro" title="Panel B-Hood"></iframe>
+        </div>
+    </div>
+
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            const menu = document.querySelector('.menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Funcție pentru a verifica codul de acces
+        function checkAccessCode() {
+            const accessCode = document.getElementById('access-code').value;
+            console.log('Valoarea citită din câmpul de parolă:', accessCode); // Afișează valoarea citită în consolă
+
+            // Citirea codurilor de acces din fișierul access_codes.txt
+            fetch('access_codes.txt')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    const validCodes = data.trim().split('\n');
+                    if (validCodes.includes(accessCode)) {
+                        // Afisează iframe-urile și ascunde containerul de autentificare
+                        document.getElementById('auth-container').style.display = 'none';
+                        document.getElementById('iframe-container').classList.remove('blurred');
+                    } else {
+                        alert('Cod de acces incorect!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Eroare la citirea fișierului:', error);
+                    alert('Eroare la citirea fișierului: ' + error.message);
+                });
+        }
+    </script>
+</body>
+</html>
